@@ -32,28 +32,29 @@ public final class AStarPathfinder<N, V extends Number> extends AbstractHeuristi
 
     @Override
     public List<N> findPath(@Nonnull final ValueGraph<N, V> graph, @Nonnull final N source,
-                            @Nonnull final N destination) {
-        // The open set. Made of nodes and their relative fScore (f(N) = g(N) + h(N))
-        final PriorityQueue<Pair<N, Double>> fringe = new PriorityQueue<>(
-                graph.nodes().size(),
-                Comparator.comparingDouble(Pair::getRight)
-        );
-        final Map<N, Double> gScore = new HashMap<>();
+            @Nonnull final N destination) {
+        final PriorityQueue<Pair<N, Double>> fringe = new PriorityQueue<>(graph.nodes().size(),
+                Comparator.comparingDouble(Pair::getRight));
+        final Set<N> visited = new HashSet<>(graph.nodes().size());
+        final Map<N, Double> gScore = new HashMap<>(graph.nodes().size());
 
         // Initializing
         parents.put(source, source);
         gScore.put(source, 0.0);
-        fringe.add(Pair.of(source, getHeuristic().apply(source, destination).doubleValue()));
+        fringe.add(Pair.of(
+                source,
+                getHeuristic().apply(source, destination).doubleValue()));
 
         while (!fringe.isEmpty()) {
             final N current = fringe.poll().getLeft();
 
             if (current.equals(destination)) {
                 fringe.clear(); // Path found, clear the queue to exit loop
-            } else {
+            } else if (!visited.contains(current)){
+                visited.add(current);
                 graph.successors(current).forEach(successor -> {
-                    final double tentativeGScore
-                            = gScore.get(current) + graph.edgeValue(current, successor).orElseThrow().doubleValue();
+                    final double tentativeGScore = gScore.get(current)
+                            + graph.edgeValue(current, successor).orElseThrow().doubleValue();
 
                     if (tentativeGScore < gScore.getOrDefault(successor, Double.MAX_VALUE)) {
                         parents.put(successor, current);
