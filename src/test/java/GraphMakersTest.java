@@ -1,4 +1,4 @@
-import com.github.graphextras.commons.GraphUtils;
+import com.github.graphextras.graphs.GraphMakers;
 import com.google.common.graph.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-public class GraphUtilsTest {
+public class GraphMakersTest {
 
     private static MutableGraph<Pair<Double, Double>> simpleGraph;
 
@@ -37,15 +37,8 @@ public class GraphUtilsTest {
     @Test
     void conversion() {
         AtomicReference<ValueGraph<Pair<Double, Double>, Double>> valueGraph = new AtomicReference<>();
-        assertDoesNotThrow(() -> valueGraph.set(GraphUtils.simpleToImmutableValueGraph(simpleGraph)));
+        assertDoesNotThrow(() -> valueGraph.set(GraphMakers.simpleToImmutableValueGraph(simpleGraph)));
         assertEquals(simpleGraph.nodes(), valueGraph.get().nodes());
         assertEquals(simpleGraph.edges(), valueGraph.get().edges());
-    }
-
-    @Test
-    void randomGraph() {
-        var graph = GraphUtils.randomGraph(2500, 0.9,
-                Pair::of);
-        assertTrue(graph.nodes().size() == 2500, ""+graph.nodes().size());
     }
 }
