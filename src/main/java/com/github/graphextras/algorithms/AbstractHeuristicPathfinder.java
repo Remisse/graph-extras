@@ -13,7 +13,7 @@ abstract class AbstractHeuristicPathfinder<N> implements HeuristicPathfinder<N> 
 
     private ToDoubleBiFunction<N, N> heuristicFunc;
 
-    protected AbstractHeuristicPathfinder(@Nonnull ToDoubleBiFunction<N, N> heuristicFunc) {
+    protected AbstractHeuristicPathfinder(@Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
         this.heuristicFunc = Objects.requireNonNull(heuristicFunc);
     }
 
@@ -28,7 +28,7 @@ abstract class AbstractHeuristicPathfinder<N> implements HeuristicPathfinder<N> 
     }
 
     @Override
-    public void setHeuristic(@Nonnull ToDoubleBiFunction<N, N> newHeuristic) {
+    public void setHeuristic(@Nonnull final ToDoubleBiFunction<N, N> newHeuristic) {
         this.heuristicFunc = Objects.requireNonNull(newHeuristic);
     }
 }

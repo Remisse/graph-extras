@@ -29,7 +29,8 @@ public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
     }
 
     @Override
-    public List<N> findPath(@Nonnull final ValueGraph<N, Double> graph, final N source, final N destination) {
+    public List<N> findPath(@Nonnull final ValueGraph<N, Double> graph, @Nonnull final N source,
+            @Nonnull final N destination) {
         this.graph = Objects.requireNonNull(graph);
         final Deque<N> path = new ArrayDeque<>(graph.nodes().size());
         double threshold = heuristic(source, destination);
@@ -59,8 +60,7 @@ public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
      * given path if it exceeds the threshold, or the lowest cost found among all paths branching
      * from the given one.
      */
-    private double idaSearch(@Nonnull final Deque<N> path, @Nonnull final N destination, final double currentDepth,
-            final double threshold) {
+    private double idaSearch(final Deque<N> path, final N destination, final double currentDepth, final double threshold) {
         final N current = Objects.requireNonNull(path.peek());
         final double totalCost = currentDepth + heuristic(current, destination);
 
@@ -70,7 +70,7 @@ public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
 
         if (totalCost <= threshold) {
             double minimumCost = Double.MAX_VALUE;
-            for (N successor : graph.successors(current)) {
+            for (final N successor : graph.successors(current)) {
                 if (!path.contains(successor)) {
                     path.push(successor);
                     double pathCost = idaSearch(
