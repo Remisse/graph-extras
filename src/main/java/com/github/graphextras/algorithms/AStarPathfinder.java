@@ -5,7 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.function.*;
 
 import static com.github.graphextras.algorithms.Algorithms.reconstructPath;
 
@@ -13,9 +13,8 @@ import static com.github.graphextras.algorithms.Algorithms.reconstructPath;
  * Implements the A* search algorithm.
  *
  * @param <N> type of node
- * @param <V> type of value associated to nodes. It must be a {@link Number}.
  */
-public final class AStarPathfinder<N, V extends Number> extends AbstractHeuristicPathfinder<N, V> {
+public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
 
     private final Map<N, N> parents = new HashMap<>();
 
@@ -26,24 +25,23 @@ public final class AStarPathfinder<N, V extends Number> extends AbstractHeuristi
      * @param heuristicFunc a {@link BiFunction} for computing
      *                      node heuristic.
      */
-    public AStarPathfinder(@Nonnull final BiFunction<N, N, V> heuristicFunc) {
+    public AStarPathfinder(@Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
         super(heuristicFunc);
     }
 
     @Override
-    public List<N> findPath(@Nonnull final ValueGraph<N, V> graph, @Nonnull final N source,
-            @Nonnull final N destination) {
+    public List<N> findPath(ValueGraph<N, Double> graph, N source, N destination) {
+        // The open set. Nodes are ordered by their fScore.
         final PriorityQueue<Pair<N, Double>> fringe = new PriorityQueue<>(graph.nodes().size(),
                 Comparator.comparingDouble(Pair::getRight));
+        // The closed set.
         final Set<N> visited = new HashSet<>(graph.nodes().size());
         final Map<N, Double> gScore = new HashMap<>(graph.nodes().size());
 
         // Initializing
         parents.put(source, source);
         gScore.put(source, 0.0);
-        fringe.add(Pair.of(
-                source,
-                getHeuristic().apply(source, destination).doubleValue()));
+        fringe.add(Pair.of(source, heuristic(source, destination)));
 
         while (!fringe.isEmpty()) {
             final N current = fringe.poll().getLeft();
@@ -53,15 +51,14 @@ public final class AStarPathfinder<N, V extends Number> extends AbstractHeuristi
             } else if (!visited.contains(current)){
                 visited.add(current);
                 graph.successors(current).forEach(successor -> {
-                    final double tentativeGScore = gScore.get(current)
-                            + graph.edgeValue(current, successor).orElseThrow().doubleValue();
+                    final double tentativeGScore = gScore.get(current) + graph.edgeValue(current, successor).orElseThrow();
 
                     if (tentativeGScore < gScore.getOrDefault(successor, Double.MAX_VALUE)) {
                         parents.put(successor, current);
                         gScore.put(successor, tentativeGScore);
                         fringe.add(Pair.of(
                                 successor,
-                                tentativeGScore + getHeuristic().apply(successor, destination).doubleValue())
+                                tentativeGScore + heuristic(successor, destination))
                         );
                     }
                 });

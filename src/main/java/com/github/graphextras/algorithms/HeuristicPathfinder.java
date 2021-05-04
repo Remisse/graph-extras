@@ -1,19 +1,18 @@
 package com.github.graphextras.algorithms;
 
-import java.util.function.BiFunction;
+import java.util.function.ToDoubleBiFunction;
 
 /**
  * Interface for algorithms that make use of heuristics.
  *
  * @param <N> type of node
- * @param <V> type of value associated to nodes. It must be a {@link Number}.
  */
-public interface HeuristicPathfinder<N, V extends Number> extends Pathfinder<N, V> {
+public interface HeuristicPathfinder<N> extends Pathfinder<N> {
 
     /**
      * Sets a new function for computing node heuristics.
      *
      * @param newHeuristic the new function for computing node heuristics.
      */
-    void setHeuristic(BiFunction<N, N, V> newHeuristic);
+    void setHeuristic(ToDoubleBiFunction<N, N> newHeuristic);
 }
