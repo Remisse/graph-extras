@@ -40,6 +40,13 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
         super(heuristicFunc);
     }
 
+    /**
+     * Clears the contents of preexisting collections and
+     * performs a preliminary initialization.
+     *
+     * @param source the source node
+     * @param destination the destination node
+     */
     private void initialize(final N source, final N destination) {
         visited.clear();
         gScore.clear();
