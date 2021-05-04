@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides utility methods used by certain pathfinding algorithms.
+ * Collection of utility methods used by certain pathfinding algorithms.
  */
 final class Algorithms {
 
