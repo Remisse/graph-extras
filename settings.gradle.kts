@@ -1,2 +1,2 @@
-rootProject.name = "guava-shortestpath"
+rootProject.name = "graph-extras"
 
