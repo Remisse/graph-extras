@@ -31,14 +31,17 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
     }
 
     @Override
-    public List<N> findPath(ValueGraph<N, Double> graph, N source, N destination) {
-        // The open set. Nodes are ordered by their fScore.
+    public List<N> findPath(@Nonnull final ValueGraph<N, Double> graph, @Nonnull final N source,
+            @Nonnull final N destination) {
+        // Open set. Nodes are ordered by their fScore.
         final PriorityQueue<ObjectDoubleImmutablePair<N>> fringe = new PriorityQueue<>(graph.nodes().size(),
                 Comparator.comparingDouble(ObjectDoublePair::valueDouble));
-        // The closed set.
+        // Closed set.
         final Set<N> visited = new HashSet<>(graph.nodes().size());
-        final ObjectDoubleMap<N> gScore = new ObjectDoubleHashMap<>();
+        // Parents tree. Used to reconstruct the path once the algorithm will
+        // end its search.
         final Map<N, N> parents = new HashMap<>();
+        final ObjectDoubleMap<N> gScore = new ObjectDoubleHashMap<>();
 
         // Initializing
         parents.put(source, source);
@@ -49,7 +52,7 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
             final N current = fringe.poll().left();
 
             if (current.equals(destination)) {
-                fringe.clear(); // Path found, clear the queue to exit loop
+                return reconstructPath(parents, destination);
             } else if (!visited.contains(current)){
                 visited.add(current);
                 graph.successors(current).forEach(successor -> {
@@ -66,6 +69,6 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
                 });
             }
         }
-        return reconstructPath(parents, destination);
+        return Collections.emptyList();
     }
 }
