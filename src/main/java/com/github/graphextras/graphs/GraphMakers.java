@@ -79,6 +79,25 @@ public final class GraphMakers {
         return ImmutableValueGraph.copyOf(mutableGridFrom(points, spacing, pointCreator));
     }
 
+    private static <N> MutableValueGraph<N, Double> buildValueGraph(boolean isDirected, boolean allowsSelfLoops,
+            int nodeCount) {
+        MutableValueGraph<N, Double> graph;
+
+        if (isDirected) {
+            graph = ValueGraphBuilder.directed()
+                    .allowsSelfLoops(allowsSelfLoops)
+                    .expectedNodeCount(nodeCount)
+                    .build();
+        } else {
+            graph = ValueGraphBuilder.undirected()
+                    .allowsSelfLoops(allowsSelfLoops)
+                    .expectedNodeCount(nodeCount)
+                    .build();
+        }
+
+        return graph;
+    }
+
     /**
      * Converts a {@link Graph} to a {@link MutableValueGraph} whose edges will
      * all have weight equal to 1.0.
@@ -89,13 +108,8 @@ public final class GraphMakers {
      * the given {@link Graph}.
      */
     public static <N> MutableValueGraph<N, Double> simpleToMutableValueGraph(@Nonnull final Graph<N> simpleGraph) {
-        MutableValueGraph<N, Double> graph;
-
-        if (simpleGraph.isDirected()) {
-            graph = ValueGraphBuilder.directed().allowsSelfLoops(simpleGraph.allowsSelfLoops()).build();
-        } else {
-            graph = ValueGraphBuilder.undirected().allowsSelfLoops(simpleGraph.allowsSelfLoops()).build();
-        }
+        MutableValueGraph<N, Double> graph = buildValueGraph(simpleGraph.isDirected(), simpleGraph.allowsSelfLoops(),
+                simpleGraph.nodes().size());
 
         simpleGraph.nodes().forEach(graph::addNode);
         simpleGraph.edges().forEach(e -> graph.putEdgeValue(e.nodeU(), e.nodeV(), DEFAULT_WEIGHT));
@@ -127,23 +141,18 @@ public final class GraphMakers {
      */
     public static <N, E> MutableValueGraph<N, Double> networkToMutableValueGraph(@Nonnull final Network<N, E> network,
             @Nonnull final ToDoubleFunction<E> weightFunc) {
-        MutableValueGraph<N, Double> graph;
-
-        if (network.isDirected()) {
-            graph = ValueGraphBuilder.directed().allowsSelfLoops(network.allowsSelfLoops()).build();
-        } else {
-            graph = ValueGraphBuilder.undirected().allowsSelfLoops(network.allowsSelfLoops()).build();
-        }
+        MutableValueGraph<N, Double> graph = buildValueGraph(network.isDirected(), network.allowsSelfLoops(),
+                network.nodes().size());
 
         network.nodes().forEach(graph::addNode);
-        network.nodes().forEach(node -> {
-            network.successors(node).forEach(successor -> {
+        network.nodes().forEach(node ->
+            network.successors(node).forEach(successor ->
                 graph.putEdgeValue(
-                        node,
-                        successor,
-                        weightFunc.applyAsDouble(network.edgeConnecting(node, successor).orElseThrow()));
-            });
-        });
+                    node,
+                    successor,
+                    weightFunc.applyAsDouble(network.edgeConnecting(node, successor).orElseThrow()))
+            )
+        );
         return graph;
     }
 
