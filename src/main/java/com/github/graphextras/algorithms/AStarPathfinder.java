@@ -19,6 +19,16 @@ import static com.github.graphextras.algorithms.Algorithms.reconstructPath;
  */
 public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
 
+    // Open set. Nodes are ordered by their fScore.
+    private final PriorityQueue<ObjectDoubleImmutablePair<N>> fringe = new PriorityQueue<>(
+            Comparator.comparingDouble(ObjectDoublePair::valueDouble));
+    // Closed set.
+    private final Set<N> visited = new HashSet<>();
+    // Parents tree. Used to reconstruct the path once the algorithm will
+    // end its search.
+    private final Map<N, N> parents = new HashMap<>();
+    private final ObjectDoubleMap<N> gScore = new ObjectDoubleHashMap<>();
+
     /**
      * Instantiates a new {@link AStarPathfinder} object with
      * the given heuristic function.
@@ -30,23 +40,21 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
         super(heuristicFunc);
     }
 
-    @Override
-    public List<N> findPath(@Nonnull final ValueGraph<N, Double> graph, @Nonnull final N source,
-            @Nonnull final N destination) {
-        // Open set. Nodes are ordered by their fScore.
-        final PriorityQueue<ObjectDoubleImmutablePair<N>> fringe = new PriorityQueue<>(graph.nodes().size(),
-                Comparator.comparingDouble(ObjectDoublePair::valueDouble));
-        // Closed set.
-        final Set<N> visited = new HashSet<>(graph.nodes().size());
-        // Parents tree. Used to reconstruct the path once the algorithm will
-        // end its search.
-        final Map<N, N> parents = new HashMap<>();
-        final ObjectDoubleMap<N> gScore = new ObjectDoubleHashMap<>();
+    private void initialize(final N source, final N destination) {
+        visited.clear();
+        gScore.clear();
+        fringe.clear();
 
-        // Initializing
         parents.put(source, source);
         gScore.put(source, 0.0);
         fringe.add(ObjectDoubleImmutablePair.of(source, heuristic(source, destination)));
+    }
+
+    @Override
+    public List<N> findPath(@Nonnull final ValueGraph<N, Double> graph, @Nonnull final N source,
+            @Nonnull final N destination) {
+        Objects.requireNonNull(graph);
+        initialize(Objects.requireNonNull(source), Objects.requireNonNull(destination));
 
         while (!fringe.isEmpty()) {
             final N current = fringe.poll().left();
