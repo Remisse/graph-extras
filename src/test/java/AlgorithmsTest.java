@@ -11,6 +11,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static com.github.graphextras.algorithms.TwoDimensionalHeuristics.euclideanDistance;
 
+@SuppressWarnings("SuspiciousNameCombination")
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class AlgorithmsTest {
 
