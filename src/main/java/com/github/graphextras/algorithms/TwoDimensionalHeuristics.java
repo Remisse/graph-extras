@@ -10,6 +10,8 @@ import java.util.function.ToDoubleFunction;
  */
 public final class TwoDimensionalHeuristics {
 
+    public static final double SQRT_2 = .41421356237;
+
     private TwoDimensionalHeuristics() {
     }
 
@@ -40,7 +42,7 @@ public final class TwoDimensionalHeuristics {
         return (node1, node2) -> {
             final double dx = Math.abs(x.applyAsDouble(node2) - x.applyAsDouble(node1));
             final double dy = Math.abs(y.applyAsDouble(node2) - y.applyAsDouble(node1));
-            return Math.max(dx, dy) + .41421356237 * Math.min(dx, dy);
+            return Math.max(dx, dy) + SQRT_2 * Math.min(dx, dy);
         };
     }
 
