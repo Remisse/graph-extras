@@ -1,6 +1,7 @@
 import com.github.graphextras.graphs.GraphMakers;
 import com.google.common.graph.*;
-import org.apache.commons.lang3.tuple.Pair;
+import it.unimi.dsi.fastutil.doubles.DoubleDoubleImmutablePair;
+import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -12,15 +13,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class GraphMakersTest {
 
-    private static MutableGraph<Pair<Double, Double>> simpleGraph;
+    private static MutableGraph<DoubleDoublePair> simpleGraph;
 
-    private final static Pair<Double, Double> p1 = Pair.of(0.0, 0.0);
-    private final static Pair<Double, Double> p2 = Pair.of(5.0, 0.0);
-    private final static Pair<Double, Double> p3 = Pair.of(0.0, 1.0);
-    private final static Pair<Double, Double> p4 = Pair.of(4.0, 0.0);
-    private final static Pair<Double, Double> p5 = Pair.of(2.0, 0.0);
-    private final static Pair<Double, Double> p6 = Pair.of(3.0, 3.0);
-    private final static Pair<Double, Double> p7 = Pair.of(4.0, 4.0);
+    private final static DoubleDoublePair p1 = DoubleDoubleImmutablePair.of(0.0, 0.0);
+    private final static DoubleDoublePair p2 = DoubleDoubleImmutablePair.of(5.0, 0.0);
+    private final static DoubleDoublePair p3 = DoubleDoubleImmutablePair.of(0.0, 1.0);
+    private final static DoubleDoublePair p4 = DoubleDoubleImmutablePair.of(4.0, 0.0);
+    private final static DoubleDoublePair p5 = DoubleDoubleImmutablePair.of(2.0, 0.0);
+    private final static DoubleDoublePair p6 = DoubleDoubleImmutablePair.of(3.0, 3.0);
+    private final static DoubleDoublePair p7 = DoubleDoubleImmutablePair.of(4.0, 4.0);
 
     @BeforeAll
     static void setup() {
@@ -36,7 +37,7 @@ public class GraphMakersTest {
 
     @Test
     void conversion() {
-        AtomicReference<ValueGraph<Pair<Double, Double>, Double>> valueGraph = new AtomicReference<>();
+        AtomicReference<ValueGraph<DoubleDoublePair, Double>> valueGraph = new AtomicReference<>();
         assertDoesNotThrow(() -> valueGraph.set(GraphMakers.simpleToImmutableValueGraph(simpleGraph)));
         assertEquals(simpleGraph.nodes(), valueGraph.get().nodes());
         assertEquals(simpleGraph.edges(), valueGraph.get().edges());

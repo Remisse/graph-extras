@@ -1,7 +1,10 @@
 package com.github.graphextras.algorithms;
 
+import com.carrotsearch.hppc.ObjectDoubleHashMap;
+import com.carrotsearch.hppc.ObjectDoubleMap;
 import com.google.common.graph.ValueGraph;
-import org.apache.commons.lang3.tuple.Pair;
+import it.unimi.dsi.fastutil.objects.ObjectDoubleImmutablePair;
+import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -15,8 +18,6 @@ import static com.github.graphextras.algorithms.Algorithms.reconstructPath;
  * @param <N> type of node
  */
 public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
-
-    private final Map<N, N> parents = new HashMap<>();
 
     /**
      * Instantiates a new {@link AStarPathfinder} object with
@@ -32,19 +33,20 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
     @Override
     public List<N> findPath(ValueGraph<N, Double> graph, N source, N destination) {
         // The open set. Nodes are ordered by their fScore.
-        final PriorityQueue<Pair<N, Double>> fringe = new PriorityQueue<>(graph.nodes().size(),
-                Comparator.comparingDouble(Pair::getRight));
+        final PriorityQueue<ObjectDoubleImmutablePair<N>> fringe = new PriorityQueue<>(graph.nodes().size(),
+                Comparator.comparingDouble(ObjectDoublePair::valueDouble));
         // The closed set.
         final Set<N> visited = new HashSet<>(graph.nodes().size());
-        final Map<N, Double> gScore = new HashMap<>(graph.nodes().size());
+        final ObjectDoubleMap<N> gScore = new ObjectDoubleHashMap<>();
+        final Map<N, N> parents = new HashMap<>();
 
         // Initializing
         parents.put(source, source);
         gScore.put(source, 0.0);
-        fringe.add(Pair.of(source, heuristic(source, destination)));
+        fringe.add(ObjectDoubleImmutablePair.of(source, heuristic(source, destination)));
 
         while (!fringe.isEmpty()) {
-            final N current = fringe.poll().getLeft();
+            final N current = fringe.poll().left();
 
             if (current.equals(destination)) {
                 fringe.clear(); // Path found, clear the queue to exit loop
@@ -56,7 +58,7 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
                     if (tentativeGScore < gScore.getOrDefault(successor, Double.MAX_VALUE)) {
                         parents.put(successor, current);
                         gScore.put(successor, tentativeGScore);
-                        fringe.add(Pair.of(
+                        fringe.add(ObjectDoubleImmutablePair.of(
                                 successor,
                                 tentativeGScore + heuristic(successor, destination))
                         );
