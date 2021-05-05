@@ -6,10 +6,6 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.ToDoubleBiFunction;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
 
 /**
  * Implements the Iterative Deepening A* algorithm.
@@ -43,12 +39,12 @@ public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
         double threshold = heuristic(source, destination);
 
         path.addLast(source);
-        while (threshold < Double.MAX_VALUE) {
+        do {
             threshold = idaSearch(path, destination, 0.0, threshold);
             if (threshold == FOUND) {
                 return new ArrayList<>(path);
             }
-        }
+        } while (threshold < Double.MAX_VALUE);
         return Collections.emptyList();
     }
 
