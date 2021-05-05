@@ -1,40 +1,46 @@
 package com.github.graphextras.algorithms;
 
-import com.google.common.graph.ValueGraph;
+import com.google.common.graph.Network;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.ToDoubleBiFunction;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Implements the Iterative Deepening A* algorithm.
  * <br>
+ * See {@link Heuristics} for a set of predefined heuristic functions.
+ * <p>
  * Please note that, depending on the graph's size, this algorithm can be extremely slow.
  * It should only be used if it is critical that memory consumption be reduced to a
  * minimum.
+ * </p>
  *
  * @param <N> type of node
+ * @param <E> type of edge
  */
-public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
+public final class IDAStarPathfinder<N, E> extends AbstractHeuristicPathfinder<N, E> {
 
     private static final double FOUND = -1.0;
-    private ValueGraph<N, Double> graph;
 
     /**
      * Instantiates a new {@code IDAStarPathfinder} with the given
      * heuristic function.
      *
-     * @param heuristicFunc a {@link BiFunction} for estimating distances.
+     * @param graph the graph on which the searches will be performed.
+     * @param edgeWeight function for extracting the weights of the given
+     *                   graph's edges
+     * @param heuristicFunc function for estimating the distance between a
+     *                      node and the destination.
      */
-    public IDAStarPathfinder(@Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
-        super(heuristicFunc);
+    public IDAStarPathfinder(@Nonnull final Network<N, E> graph, @Nonnull final ToDoubleFunction<E> edgeWeight,
+            @Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
+        super(graph, edgeWeight, heuristicFunc);
     }
 
     @Override
-    public List<N> findPath(@Nonnull final ValueGraph<N, Double> graph, @Nonnull final N source,
-            @Nonnull final N destination) {
-        this.graph = Objects.requireNonNull(graph);
+    public List<N> findPath(@Nonnull final N source, @Nonnull final N destination) {
         final Deque<N> path = new ArrayDeque<>();
         double threshold = heuristic(source, destination);
 
@@ -71,13 +77,13 @@ public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
 
         if (totalCost <= threshold) {
             double minimumCost = Double.MAX_VALUE;
-            for (final N successor : graph.successors(current)) {
+            for (final N successor : getGraph().successors(current)) {
                 if (!path.contains(successor)) {
                     path.addLast(successor);
                     double pathCost = idaSearch(
                             path,
                             destination,
-                            currentDepth + graph.edgeValue(current, successor).orElseThrow(),
+                            currentDepth + weightOf(getGraph().edgeConnecting(current, successor).orElseThrow()),
                             threshold
                     );
                     if (pathCost == FOUND) {

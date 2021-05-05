@@ -2,7 +2,7 @@ package com.github.graphextras.algorithms;
 
 import com.carrotsearch.hppc.ObjectDoubleHashMap;
 import com.carrotsearch.hppc.ObjectDoubleMap;
-import com.google.common.graph.ValueGraph;
+import com.google.common.graph.Network;
 import it.unimi.dsi.fastutil.objects.ObjectDoubleImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 
@@ -11,13 +11,17 @@ import java.util.*;
 import java.util.function.*;
 
 import static com.github.graphextras.algorithms.Pathfinders.reconstructPath;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Implements the A* search algorithm.
+ * <br>
+ * See {@link Heuristics} for a set of predefined heuristic functions.
  *
  * @param <N> type of node
+ * @param <E> type of edge
  */
-public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
+public final class AStarPathfinder<N, E> extends AbstractHeuristicPathfinder<N, E> {
 
     /*
      * Open set. Nodes are ordered by their fScore.
@@ -33,18 +37,23 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
      * ends its search.
      */
     private final Map<N, N> parents = new HashMap<>();
+    /*
+     * Map containing gScores for all nodes.
+     */
     private final ObjectDoubleMap<N> gScore = new ObjectDoubleHashMap<>();
 
     /**
-     * Instantiates a new {@link AStarPathfinder} object with
-     * the given heuristic function.
+     * Instantiates a new {@link AStarPathfinder} object.
      *
-     * @param heuristicFunc a {@link BiFunction} for estimating
-     *                      the distance from a node to the
-     *                      destination.
+     * @param graph the graph on which the searches will be performed.
+     * @param edgeWeight function for extracting the weights of the given
+     *                   graph's edges
+     * @param heuristicFunc function for estimating the distance between a
+     *                      node and the destination.
      */
-    public AStarPathfinder(@Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
-        super(heuristicFunc);
+    public AStarPathfinder(@Nonnull final Network<N, E> graph, @Nonnull final ToDoubleFunction<E> edgeWeight,
+            @Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
+        super(graph, edgeWeight, heuristicFunc);
     }
 
     /**
@@ -65,11 +74,8 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
     }
 
     @Override
-    public List<N> findPath(@Nonnull final ValueGraph<N, Double> graph, @Nonnull final N source,
-            @Nonnull final N destination) {
-        Objects.requireNonNull(graph);
-
-        initialize(Objects.requireNonNull(source), Objects.requireNonNull(destination));
+    public List<N> findPath(@Nonnull final N source, @Nonnull final N destination) {
+        initialize(requireNonNull(source), requireNonNull(destination));
 
         while (!fringe.isEmpty()) {
             final N current = fringe.poll().left();
@@ -79,8 +85,9 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
             }
             if (!visited.contains(current)){
                 visited.add(current);
-                graph.successors(current).forEach(successor -> {
-                    final double tentativeGScore = gScore.get(current) + graph.edgeValue(current, successor).orElseThrow();
+                getGraph().successors(current).forEach(successor -> {
+                    final double tentativeGScore = gScore.get(current)
+                            + weightOf(getGraph().edgeConnecting(current, successor).orElseThrow());
 
                     if (tentativeGScore < gScore.getOrDefault(successor, Double.MAX_VALUE)) {
                         parents.put(successor, current);

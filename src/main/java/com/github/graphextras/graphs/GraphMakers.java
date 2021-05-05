@@ -1,19 +1,18 @@
 package com.github.graphextras.graphs;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.graph.*;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.ToDoubleFunction;
 
 /**
  * Collection of utility methods for generating graphs.
  */
 public final class GraphMakers {
-
-    private static final double DEFAULT_WEIGHT = 1.0;
 
     private GraphMakers() {
     }
@@ -22,7 +21,7 @@ public final class GraphMakers {
      * Creates a grid-like mutable graph from a set of 2D points.
      * <p>
      * A node will be instantiated for each point in the set with the given
-     * {@code creator} function (e.g. {@code (x, y) -> Pair.of(x, y)}).
+     * {@code nodeFunc} function (e.g. {@code (x, y) -> Pair.of(x, y)}).
      * An edge will be created for every two nodes whose euclidean distance
      * is lower than or equal to the given {@code spacing}.
      * </p>
@@ -30,142 +29,55 @@ public final class GraphMakers {
      * @param points the set of 2D points
      * @param spacing the maximum distance between two points for which an edge
      *                will be created
-     * @param creator the function used for instantiating nodes from a pair
-     *                     of 2D coordinates
+     * @param nodeFunc function for instantiating nodes from a pair
+     *                 of 2D coordinates
+     * @param edgeFunc function for creating edges when given two nodes
      * @param <N> type of node
-     * @return a grid in the form of a {@link MutableValueGraph}.
+     * @param <E> type of edge
+     * @return a grid in the form of a {@link MutableNetwork}.
      */
-    public static <N> MutableValueGraph<N, Double> mutableGridFrom(@Nonnull final Set<double[]> points,
-            final double spacing, @Nonnull final BiFunction<Double, Double, N> creator) {
-        Objects.requireNonNull(creator);
-        checkArgument(!Objects.requireNonNull(points).isEmpty(), "An empty set of points was supplied.");
+    public static <N, E> MutableNetwork<N, E> mutableGrid(@Nonnull final Set<double[]> points,  final double spacing,
+            @Nonnull final BiFunction<Double, Double, N> nodeFunc, @Nonnull final BiFunction<N, N, E> edgeFunc) {
+        requireNonNull(nodeFunc);
+        requireNonNull(edgeFunc);
+        checkArgument(!requireNonNull(points).isEmpty(), "An empty set of points was supplied.");
         checkArgument(points.stream().allMatch(a -> a.length == 2), "Points must be two-dimensional.");
 
-        final MutableValueGraph<N, Double> graph = ValueGraphBuilder.undirected().build();
-        points.forEach(p -> graph.addNode(creator.apply(p[0], p[1])));
+        final MutableNetwork<N, E> grid = NetworkBuilder.undirected().build();
+        points.forEach(p -> grid.addNode(nodeFunc.apply(p[0], p[1])));
         points.forEach(first ->
             points.forEach(second -> {
                 if (!Arrays.equals(first, second)) {
+                    final N node1 = nodeFunc.apply(first[0], first[1]);
+                    final N node2 = nodeFunc.apply(second[0],second[1]);
                     final double dx = first[0] - second[0];
                     final double dy = first[1] - second[1];
                     final double distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance <= spacing) {
-                        graph.putEdgeValue(
-                                creator.apply(first[0], first[1]),
-                                creator.apply(second[0],second[1]),
-                                distance);
+                    if (distance <= spacing && !grid.hasEdgeConnecting(node1, node2)) {
+                        grid.addEdge(node1, node2, edgeFunc.apply(node1, node2));
                     }
                 }
             })
         );
-        return graph;
+        return grid;
     }
 
     /**
-     * Variant of {@link GraphMakers::mutableGridFrom} that outputs an immutable
+     * Variant of {@link GraphMakers::mutableGrid} that outputs an immutable
      * graph.
      *
      * @param points the set of 2D points
      * @param spacing the maximum distance between two points for which an edge
      *                will be created
-     * @param creator the function used for instantiating nodes from a pair
-     *                     of 2D coordinates
+     * @param nodeFunc function for instantiating nodes from a pair
+     *                 of 2D coordinates
+     * @param edgeFunc function for creating edges when given two nodes
      * @param <N> type of node
-     * @return a grid in the form of an {@link ImmutableValueGraph}.
+     * @param <E> type of edge
+     * @return a grid in the form of an {@link ImmutableNetwork}.
      */
-    public static <N> ImmutableValueGraph<N, Double> immutableGridFrom(@Nonnull final Set<double[]> points,
-            final double spacing, @Nonnull final BiFunction<Double, Double, N> creator) {
-        return ImmutableValueGraph.copyOf(mutableGridFrom(points, spacing, creator));
-    }
-
-    private static <N> MutableValueGraph<N, Double> buildValueGraph(boolean isDirected, boolean allowsSelfLoops,
-            int nodeCount) {
-        MutableValueGraph<N, Double> graph;
-
-        if (isDirected) {
-            graph = ValueGraphBuilder.directed()
-                    .allowsSelfLoops(allowsSelfLoops)
-                    .expectedNodeCount(nodeCount)
-                    .build();
-        } else {
-            graph = ValueGraphBuilder.undirected()
-                    .allowsSelfLoops(allowsSelfLoops)
-                    .expectedNodeCount(nodeCount)
-                    .build();
-        }
-
-        return graph;
-    }
-
-    /**
-     * Converts a {@link Graph} to a {@link MutableValueGraph} whose edges will
-     * all have weight equal to 1.0.
-     *
-     * @param simpleGraph the graph to be converted
-     * @param <N> type of node
-     * @return a {@link MutableValueGraph} with the same sets of nodes and edges of
-     * the given {@link Graph}.
-     */
-    public static <N> MutableValueGraph<N, Double> simpleToMutableValueGraph(@Nonnull final Graph<N> simpleGraph) {
-        MutableValueGraph<N, Double> graph = buildValueGraph(simpleGraph.isDirected(), simpleGraph.allowsSelfLoops(),
-                simpleGraph.nodes().size());
-
-        simpleGraph.nodes().forEach(graph::addNode);
-        simpleGraph.edges().forEach(e -> graph.putEdgeValue(e.nodeU(), e.nodeV(), DEFAULT_WEIGHT));
-
-        return graph;
-    }
-
-    /**
-     * Converts a {@link Graph} to an {@link ImmutableValueGraph} whose edges will
-     * all have weight equal to 1.0.
-     *
-     * @param simpleGraph the graph to be converted
-     * @param <N> type of node
-     * @return an {@link ImmutableValueGraph} with the same sets of nodes and edges of
-     * the given {@link Graph}.
-     */
-    public static <N> ImmutableValueGraph<N, Double> simpleToImmutableValueGraph(@Nonnull final Graph<N> simpleGraph) {
-        return ImmutableValueGraph.copyOf(simpleToMutableValueGraph(simpleGraph));
-    }
-
-    /**
-     * Converts a {@link Network} to a {@link MutableValueGraph} whose edges
-     * will have a weight assigned by the given {@code weightFunc}.
-     *
-     * @param network the network to be converted
-     * @param <N> type of node
-     * @return a {@link MutableValueGraph} with the same sets of nodes and edges of
-     * the given {@link Network}.
-     */
-    public static <N, E> MutableValueGraph<N, Double> networkToMutableValueGraph(@Nonnull final Network<N, E> network,
-            @Nonnull final ToDoubleFunction<E> weightFunc) {
-        MutableValueGraph<N, Double> graph = buildValueGraph(network.isDirected(), network.allowsSelfLoops(),
-                network.nodes().size());
-
-        network.nodes().forEach(graph::addNode);
-        network.nodes().forEach(node ->
-            network.successors(node).forEach(successor ->
-                graph.putEdgeValue(
-                    node,
-                    successor,
-                    weightFunc.applyAsDouble(network.edgeConnecting(node, successor).orElseThrow()))
-            )
-        );
-        return graph;
-    }
-
-    /**
-     * Converts a {@link Network} to an {@link ImmutableValueGraph} whose edges
-     * will have a weight assigned by the given {@code weightFunc}.
-     *
-     * @param network the network to be converted
-     * @param <N> type of node
-     * @return an {@link ImmutableValueGraph} with the same sets of nodes and edges of
-     * the given {@link Network}.
-     */
-    public static <N, E> ImmutableValueGraph<N, Double> networkToImmutableValueGraph(@Nonnull final Network<N, E> network,
-            @Nonnull final ToDoubleFunction<E> weightFunc) {
-        return ImmutableValueGraph.copyOf(networkToMutableValueGraph(network, weightFunc));
+    public static <N, E> ImmutableNetwork<N, E> immutableGrid(@Nonnull final Set<double[]> points, final double spacing,
+            @Nonnull final BiFunction<Double, Double, N> nodeFunc, @Nonnull final BiFunction<N, N, E> edgeFunc) {
+        return ImmutableNetwork.copyOf(mutableGrid(points, spacing, nodeFunc, edgeFunc));
     }
 }
