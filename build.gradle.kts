@@ -1,11 +1,24 @@
 plugins {
     java
+    maven
+    `java-library`
+    `maven-publish`
 }
 
 group = "com.github"
+version = 0.1
+
 
 repositories {
     mavenCentral()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("Graph-Extras") {
+            from(components["java"])
+        }
+    }
 }
 
 java {
