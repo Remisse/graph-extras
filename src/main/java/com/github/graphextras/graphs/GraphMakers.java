@@ -14,7 +14,6 @@ import java.util.function.ToDoubleFunction;
 public final class GraphMakers {
 
     private static final double DEFAULT_WEIGHT = 1.0;
-    private static final double EPSILON = 0.000001;
 
     private GraphMakers() {
     }
@@ -25,18 +24,19 @@ public final class GraphMakers {
      * A node will be instantiated for each point in the set with the given
      * {@code creator} function (e.g. {@code (x, y) -> Pair.of(x, y)}).
      * An edge will be created for every two nodes whose euclidean distance
-     * is equal to the given {@code spacing}.
+     * is lower than or equal to the given {@code spacing}.
      * </p>
      *
      * @param points the set of 2D points
-     * @param spacing the distance between two points for which an edge will be created
+     * @param spacing the maximum distance between two points for which an edge
+     *                will be created
      * @param creator the function used for instantiating nodes from a pair
      *                     of 2D coordinates
      * @param <N> type of node
      * @return a grid in the form of a {@link MutableValueGraph}.
      */
     public static <N> MutableValueGraph<N, Double> mutableGridFrom(@Nonnull final Set<double[]> points,
-           final double spacing, @Nonnull final BiFunction<Double, Double, N> creator) {
+            final double spacing, @Nonnull final BiFunction<Double, Double, N> creator) {
         Objects.requireNonNull(creator);
         checkArgument(!Objects.requireNonNull(points).isEmpty(), "An empty set of points was supplied.");
         checkArgument(points.stream().allMatch(a -> a.length == 2), "Points must be two-dimensional.");
@@ -45,11 +45,16 @@ public final class GraphMakers {
         points.forEach(p -> graph.addNode(creator.apply(p[0], p[1])));
         points.forEach(first ->
             points.forEach(second -> {
-                final double dx = first[0] - second[0];
-                final double dy = first[1] - second[1];
-                final double distance = Math.sqrt(dx * dx + dy * dy);
-                if (Math.abs(distance - spacing) <= EPSILON) {
-                    graph.putEdgeValue(creator.apply(first[0], first[1]), creator.apply(second[0], second[1]), distance);
+                if (!Arrays.equals(first, second)) {
+                    final double dx = first[0] - second[0];
+                    final double dy = first[1] - second[1];
+                    final double distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance <= spacing) {
+                        graph.putEdgeValue(
+                                creator.apply(first[0], first[1]),
+                                creator.apply(second[0],second[1]),
+                                distance);
+                    }
                 }
             })
         );
@@ -57,24 +62,20 @@ public final class GraphMakers {
     }
 
     /**
-     * Creates a grid-like immutable graph from a set of 2D points.
-     * <p>
-     * A node will be instantiated for each point in the set with the given
-     * {@code pointCreator} function (e.g. {@code (x, y) -> Pair.of(x, y)}).
-     * An edge will be created for every two nodes whose euclidean distance
-     * is equal to the given {@code spacing}.
-     * </p>
+     * Variant of {@link GraphMakers::mutableGridFrom} that outputs an immutable
+     * graph.
      *
      * @param points the set of 2D points
-     * @param spacing the distance between two points for which an edge will be created
-     * @param pointCreator the function used for instantiating nodes from a pair
+     * @param spacing the maximum distance between two points for which an edge
+     *                will be created
+     * @param creator the function used for instantiating nodes from a pair
      *                     of 2D coordinates
      * @param <N> type of node
      * @return a grid in the form of an {@link ImmutableValueGraph}.
      */
     public static <N> ImmutableValueGraph<N, Double> immutableGridFrom(@Nonnull final Set<double[]> points,
-            final double spacing, @Nonnull final BiFunction<Double, Double, N> pointCreator) {
-        return ImmutableValueGraph.copyOf(mutableGridFrom(points, spacing, pointCreator));
+            final double spacing, @Nonnull final BiFunction<Double, Double, N> creator) {
+        return ImmutableValueGraph.copyOf(mutableGridFrom(points, spacing, creator));
     }
 
     private static <N> MutableValueGraph<N, Double> buildValueGraph(boolean isDirected, boolean allowsSelfLoops,
