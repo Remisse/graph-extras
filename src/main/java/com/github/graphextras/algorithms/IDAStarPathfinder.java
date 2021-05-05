@@ -6,9 +6,17 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.ToDoubleBiFunction;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 
 /**
  * Implements the Iterative Deepening A* algorithm.
+ * <br>
+ * Please note that, depending on the graph's size, this algorithm can be extremely slow.
+ * It should only be used if it is critical that memory consumption be reduced to a
+ * minimum.
  *
  * @param <N> type of node
  */
@@ -21,8 +29,7 @@ public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
      * Instantiates a new {@code IDAStarPathfinder} with the given
      * heuristic function.
      *
-     * @param heuristicFunc a {@link BiFunction} for computing
-     *                      node heuristic.
+     * @param heuristicFunc a {@link BiFunction} for estimating distances.
      */
     public IDAStarPathfinder(@Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
         super(heuristicFunc);
@@ -32,16 +39,14 @@ public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
     public List<N> findPath(@Nonnull final ValueGraph<N, Double> graph, @Nonnull final N source,
             @Nonnull final N destination) {
         this.graph = Objects.requireNonNull(graph);
-        final Deque<N> path = new ArrayDeque<>(graph.nodes().size());
+        final Deque<N> path = new ArrayDeque<>();
         double threshold = heuristic(source, destination);
 
-        path.push(source);
+        path.addLast(source);
         while (threshold < Double.MAX_VALUE) {
             threshold = idaSearch(path, destination, 0.0, threshold);
             if (threshold == FOUND) {
-                final List<N> foundPath = new ArrayList<>(path);
-                Collections.reverse(foundPath);
-                return foundPath;
+                return new ArrayList<>(path);
             }
         }
         return Collections.emptyList();
@@ -58,10 +63,10 @@ public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
      * @param threshold    the current cost limit
      * @return either {@code -1.0} if the destination is found on the given path, or the total cost of the
      * given path if it exceeds the threshold, or the lowest cost found among all paths branching
-     * from the given one.
+     * from the given one (will become the new threshold).
      */
     private double idaSearch(final Deque<N> path, final N destination, final double currentDepth, final double threshold) {
-        final N current = Objects.requireNonNull(path.peek());
+        final N current = Objects.requireNonNull(path.peekLast());
         final double totalCost = currentDepth + heuristic(current, destination);
 
         if (current.equals(destination)) {
@@ -72,7 +77,7 @@ public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
             double minimumCost = Double.MAX_VALUE;
             for (final N successor : graph.successors(current)) {
                 if (!path.contains(successor)) {
-                    path.push(successor);
+                    path.addLast(successor);
                     double pathCost = idaSearch(
                             path,
                             destination,
@@ -85,11 +90,17 @@ public final class IDAStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
                     if (pathCost < minimumCost) {
                         minimumCost = pathCost;
                     }
-                    path.pop();
+                    path.removeLast();
                 }
             }
+            /*
+             * Path seems promising, increase the threshold.
+             */
             return minimumCost;
         }
+        /*
+         * Threshold exceeded, discard this path.
+         */
         return totalCost;
     }
 }
