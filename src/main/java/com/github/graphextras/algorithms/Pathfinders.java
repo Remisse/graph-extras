@@ -9,9 +9,9 @@ import java.util.Map;
 /**
  * Collection of utility methods used by certain pathfinding algorithms.
  */
-final class Algorithms {
+final class Pathfinders {
 
-    private Algorithms() {
+    private Pathfinders() {
     }
 
     /**

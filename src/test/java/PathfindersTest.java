@@ -10,11 +10,11 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static com.github.graphextras.algorithms.TwoDimensionalHeuristics.euclideanDistance;
+import static com.github.graphextras.algorithms.Heuristics.euclideanDistance;
 
 @SuppressWarnings("SuspiciousNameCombination")
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-public class AlgorithmsTest {
+public class PathfindersTest {
 
     private static MutableValueGraph<DoubleDoublePair, Double> undirectedGraph;
     private static MutableValueGraph<DoubleDoublePair, Double> directedGraph;

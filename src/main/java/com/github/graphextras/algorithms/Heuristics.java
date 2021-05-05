@@ -7,11 +7,11 @@ import java.util.function.ToDoubleFunction;
 /**
  * Collection of heuristic functions to be used with pathfinding algorithms.
  */
-public final class TwoDimensionalHeuristics {
+public final class Heuristics {
 
-    public static final double SQRT_2 = .41421356237;
+    private static final double SQRT_2 = .41421356237;
 
-    private TwoDimensionalHeuristics() {
+    private Heuristics() {
     }
 
     /**
