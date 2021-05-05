@@ -5,8 +5,7 @@ import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
 
 /**
- * Provides heuristic functions to be used with pathfinding algorithms that
- * make use of heuristics.
+ * Collection of heuristic functions to be used with pathfinding algorithms.
  */
 public final class TwoDimensionalHeuristics {
 
@@ -42,7 +41,7 @@ public final class TwoDimensionalHeuristics {
         return (node1, node2) -> {
             final double dx = Math.abs(x.applyAsDouble(node2) - x.applyAsDouble(node1));
             final double dy = Math.abs(y.applyAsDouble(node2) - y.applyAsDouble(node1));
-            return Math.max(dx, dy) + SQRT_2 * Math.min(dx, dy);
+            return SQRT_2 * Math.min(dx, dy) + Math.abs(dx - dy);
         };
     }
 

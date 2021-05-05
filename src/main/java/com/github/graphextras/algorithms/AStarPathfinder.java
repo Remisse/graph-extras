@@ -33,8 +33,9 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
      * Instantiates a new {@link AStarPathfinder} object with
      * the given heuristic function.
      *
-     * @param heuristicFunc a {@link BiFunction} for computing
-     *                      node heuristic.
+     * @param heuristicFunc a {@link BiFunction} for estimating
+     *                      the distance from a node to the
+     *                      destination.
      */
     public AStarPathfinder(@Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
         super(heuristicFunc);
@@ -42,7 +43,7 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
 
     /**
      * Clears the contents of preexisting collections and
-     * performs a preliminary initialization.
+     * performs preliminary initializations.
      *
      * @param source the source node
      * @param destination the destination node
@@ -68,7 +69,8 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
 
             if (current.equals(destination)) {
                 return reconstructPath(parents, destination);
-            } else if (!visited.contains(current)){
+            }
+            if (!visited.contains(current)){
                 visited.add(current);
                 graph.successors(current).forEach(successor -> {
                     final double tentativeGScore = gScore.get(current) + graph.edgeValue(current, successor).orElseThrow();

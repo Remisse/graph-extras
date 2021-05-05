@@ -18,10 +18,10 @@ abstract class AbstractHeuristicPathfinder<N> implements HeuristicPathfinder<N> 
     }
 
     /**
-     * Provides subclasses access to the function for computing node heuristic.
+     * Provides subclasses access to the function for computing node heuristics.
      *
-     * @return the heuristic value of the given {@code node} with respect to
-     * the {@code target}.
+     * @return estimated distance from the given {@code node} to the {@code target}
+     * using the currently assigned heuristic function.
      */
     protected double heuristic(final N node, final N target) {
         return heuristicFunc.applyAsDouble(node, target);

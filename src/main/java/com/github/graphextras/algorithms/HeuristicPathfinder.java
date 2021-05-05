@@ -10,9 +10,10 @@ import java.util.function.ToDoubleBiFunction;
 public interface HeuristicPathfinder<N> extends Pathfinder<N> {
 
     /**
-     * Sets a new function for computing node heuristics.
+     * Sets a new function for computing estimated distances with regards
+     * to the destination.
      *
-     * @param newHeuristic the new function for computing node heuristics.
+     * @param newHeuristic the new function for estimating distances.
      */
     void setHeuristic(ToDoubleBiFunction<N, N> newHeuristic);
 }
