@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.*;
 
-import static com.github.graphextras.algorithms.Algorithms.reconstructPath;
+import static com.github.graphextras.algorithms.Pathfinders.reconstructPath;
 
 /**
  * Implements the A* search algorithm.
@@ -19,13 +19,19 @@ import static com.github.graphextras.algorithms.Algorithms.reconstructPath;
  */
 public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
 
-    // Open set. Nodes are ordered by their fScore.
+    /*
+     * Open set. Nodes are ordered by their fScore.
+     */
     private final PriorityQueue<ObjectDoubleImmutablePair<N>> fringe = new PriorityQueue<>(
             Comparator.comparingDouble(ObjectDoublePair::valueDouble));
-    // Closed set.
+    /*
+     * Closed set.
+     */
     private final Set<N> visited = new HashSet<>();
-    // Parents tree. Used to reconstruct the path once the algorithm will
-    // end its search.
+    /*
+     * Parents tree. Used to reconstruct the path when the algorithm
+     * ends its search.
+     */
     private final Map<N, N> parents = new HashMap<>();
     private final ObjectDoubleMap<N> gScore = new ObjectDoubleHashMap<>();
 
@@ -62,6 +68,7 @@ public final class AStarPathfinder<N> extends AbstractHeuristicPathfinder<N> {
     public List<N> findPath(@Nonnull final ValueGraph<N, Double> graph, @Nonnull final N source,
             @Nonnull final N destination) {
         Objects.requireNonNull(graph);
+
         initialize(Objects.requireNonNull(source), Objects.requireNonNull(destination));
 
         while (!fringe.isEmpty()) {
