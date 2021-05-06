@@ -91,23 +91,23 @@ public class PathfindersTest {
         aStarUndir = new AStarPathfinder<>(
                 undirectedGraph,
                 e -> euclideanDistance(DoubleDoublePair::leftDouble, DoubleDoublePair::rightDouble)
-                        .applyAsDouble(e.left(), e.right()),
+                        .apply(e.left(), e.right()),
                 euclideanDistance(DoubleDoublePair::leftDouble, DoubleDoublePair::rightDouble));
         aStarDir = new AStarPathfinder<>(
                 directedGraph,
                 e -> euclideanDistance(DoubleDoublePair::leftDouble, DoubleDoublePair::rightDouble)
-                        .applyAsDouble(e.left(), e.right()),
+                        .apply(e.left(), e.right()),
                 euclideanDistance(DoubleDoublePair::leftDouble, DoubleDoublePair::rightDouble));
 
         idaUndir = new IDAStarPathfinder<>(
                 undirectedGraph,
                 e -> euclideanDistance(DoubleDoublePair::leftDouble, DoubleDoublePair::rightDouble)
-                        .applyAsDouble(e.left(), e.right()),
+                        .apply(e.left(), e.right()),
                 euclideanDistance(DoubleDoublePair::leftDouble, DoubleDoublePair::rightDouble));
         idaDir = new IDAStarPathfinder<>(
                 directedGraph,
                 e -> euclideanDistance(DoubleDoublePair::leftDouble, DoubleDoublePair::rightDouble)
-                        .applyAsDouble(e.left(), e.right()),
+                        .apply(e.left(), e.right()),
                 euclideanDistance(DoubleDoublePair::leftDouble, DoubleDoublePair::rightDouble));
     }
 
