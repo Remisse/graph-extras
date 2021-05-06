@@ -32,9 +32,6 @@ dependencies {
 
     implementation("org.jetbrains:annotations:20.1.0")
 
-    // HPPC
-    implementation("com.carrotsearch:hppc:0.9.0.RC2")
-
     // FastUtil
     implementation("it.unimi.dsi:fastutil:8.5.4")
 

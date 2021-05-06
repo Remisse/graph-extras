@@ -1,8 +1,8 @@
 package com.github.graphextras.algorithms;
 
-import com.carrotsearch.hppc.ObjectDoubleHashMap;
-import com.carrotsearch.hppc.ObjectDoubleMap;
 import com.google.common.graph.Network;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectDoubleImmutablePair;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 
@@ -40,7 +40,7 @@ public final class AStarPathfinder<N, E> extends AbstractHeuristicPathfinder<N, 
     /*
      * Map containing gScores for all nodes.
      */
-    private final ObjectDoubleMap<N> gScore = new ObjectDoubleHashMap<>();
+    private final Object2DoubleMap<N> gScore = new Object2DoubleOpenHashMap<>();
 
     /**
      * Instantiates a new {@link AStarPathfinder} object.
@@ -86,7 +86,7 @@ public final class AStarPathfinder<N, E> extends AbstractHeuristicPathfinder<N, 
             if (!visited.contains(current)){
                 visited.add(current);
                 getGraph().successors(current).forEach(successor -> {
-                    final double tentativeGScore = gScore.get(current)
+                    final double tentativeGScore = gScore.getDouble(current)
                             + weightOf(getGraph().edgeConnecting(current, successor).orElseThrow());
 
                     if (tentativeGScore < gScore.getOrDefault(successor, Double.MAX_VALUE)) {
