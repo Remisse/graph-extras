@@ -1,7 +1,6 @@
 package com.github.graphextras.algorithms;
 
 import javax.annotation.Nonnull;
-import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -22,7 +21,7 @@ public final class Heuristics {
      * @param <N> type of node
      * @return a function for computing the Manhattan distance.
      */
-    public static <N> ToDoubleBiFunction<N, N> manhattanDistance(@Nonnull final ToDoubleFunction<N> x,
+    public static <N> HeuristicFunction<N> manhattanDistance(@Nonnull final ToDoubleFunction<N> x,
             @Nonnull final ToDoubleFunction<N> y) {
         return (node1, node2) -> Math.abs(x.applyAsDouble(node2) - x.applyAsDouble(node1))
                                 + Math.abs(y.applyAsDouble(node2) - y.applyAsDouble(node1));
@@ -36,7 +35,7 @@ public final class Heuristics {
      * @param <N> type of node
      * @return a function for computing the octile distance.
      */
-    public static <N> ToDoubleBiFunction<N, N> octileDistance(@Nonnull final ToDoubleFunction<N> x,
+    public static <N> HeuristicFunction<N> octileDistance(@Nonnull final ToDoubleFunction<N> x,
             @Nonnull final ToDoubleFunction<N> y) {
         return (node1, node2) -> {
             final double dx = Math.abs(x.applyAsDouble(node2) - x.applyAsDouble(node1));
@@ -53,7 +52,7 @@ public final class Heuristics {
      * @param <N> type of node
      * @return a function for computing the Chebyshev distance.
      */
-    public static <N> ToDoubleBiFunction<N, N> chebyshevDistance(@Nonnull final ToDoubleFunction<N> x,
+    public static <N> HeuristicFunction<N> chebyshevDistance(@Nonnull final ToDoubleFunction<N> x,
             @Nonnull final ToDoubleFunction<N> y) {
         return (node1, node2) -> {
             final double dx = Math.abs(x.applyAsDouble(node2) - x.applyAsDouble(node1));
@@ -70,7 +69,7 @@ public final class Heuristics {
      * @param <N> type of node
      * @return a function for computing the euclidean distance.
      */
-    public static <N> ToDoubleBiFunction<N, N> euclideanDistance(@Nonnull final ToDoubleFunction<N> x,
+    public static <N> HeuristicFunction<N> euclideanDistance(@Nonnull final ToDoubleFunction<N> x,
             @Nonnull final ToDoubleFunction<N> y) {
         return (node1, node2) -> {
             final double dx = x.applyAsDouble(node2) - x.applyAsDouble(node1);

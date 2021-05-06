@@ -20,7 +20,8 @@ abstract class AbstractPathfinder<N, E> implements Pathfinder<N> {
     private final ToDoubleFunction<E> edgeWeight;
 
     protected AbstractPathfinder(@Nonnull final Network<N, E> graph, @Nonnull final ToDoubleFunction<E> edgeWeight) {
-        checkArgument(!requireNonNull(graph).allowsParallelEdges(), "Graphs allowing parallel edges are not supported.");
+        checkArgument(!requireNonNull(graph).allowsParallelEdges(),
+                "Graphs allowing parallel edges are not supported.");
         this.graph = graph;
         this.edgeWeight = requireNonNull(edgeWeight);
     }

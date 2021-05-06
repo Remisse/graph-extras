@@ -1,7 +1,5 @@
 package com.github.graphextras.algorithms;
 
-import java.util.function.ToDoubleBiFunction;
-
 /**
  * Interface for algorithms that make use of heuristics.
  *
@@ -15,5 +13,5 @@ public interface HeuristicPathfinder<N> extends Pathfinder<N> {
      *
      * @param newHeuristic the new function for estimating distances.
      */
-    void setHeuristic(ToDoubleBiFunction<N, N> newHeuristic);
+    void setHeuristic(HeuristicFunction<N> newHeuristic);
 }

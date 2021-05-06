@@ -3,9 +3,9 @@ package com.github.graphextras.algorithms;
 import com.google.common.graph.Network;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
-import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Base class for {@link HeuristicPathfinder} algorithms.
@@ -14,12 +14,12 @@ import java.util.function.ToDoubleFunction;
  */
 abstract class AbstractHeuristicPathfinder<N, E> extends AbstractPathfinder<N, E> implements HeuristicPathfinder<N> {
 
-    private ToDoubleBiFunction<N, N> heuristicFunc;
+    private HeuristicFunction<N> heuristicFunc;
 
     protected AbstractHeuristicPathfinder(@Nonnull final Network<N, E> graph,
-            @Nonnull final ToDoubleFunction<E> edgeWeight, @Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
+            @Nonnull final ToDoubleFunction<E> edgeWeight, @Nonnull final HeuristicFunction<N> heuristicFunc) {
         super(graph, edgeWeight);
-        this.heuristicFunc = Objects.requireNonNull(heuristicFunc);
+        this.heuristicFunc = requireNonNull(heuristicFunc);
     }
 
     /**
@@ -30,11 +30,11 @@ abstract class AbstractHeuristicPathfinder<N, E> extends AbstractPathfinder<N, E
      * using the currently assigned heuristic function.
      */
     protected double heuristic(final N node, final N target) {
-        return heuristicFunc.applyAsDouble(node, target);
+        return heuristicFunc.apply(node, target);
     }
 
     @Override
-    public void setHeuristic(@Nonnull final ToDoubleBiFunction<N, N> newHeuristic) {
-        this.heuristicFunc = Objects.requireNonNull(newHeuristic);
+    public void setHeuristic(@Nonnull final HeuristicFunction<N> newHeuristic) {
+        this.heuristicFunc = requireNonNull(newHeuristic);
     }
 }

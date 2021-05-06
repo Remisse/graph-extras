@@ -4,7 +4,6 @@ import com.google.common.graph.Network;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -35,7 +34,7 @@ public final class IDAStarPathfinder<N, E> extends AbstractHeuristicPathfinder<N
      *                      node and the destination.
      */
     public IDAStarPathfinder(@Nonnull final Network<N, E> graph, @Nonnull final ToDoubleFunction<E> edgeWeight,
-            @Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
+            @Nonnull final HeuristicFunction<N> heuristicFunc) {
         super(graph, edgeWeight, heuristicFunc);
     }
 

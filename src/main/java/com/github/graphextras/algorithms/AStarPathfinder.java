@@ -52,7 +52,7 @@ public final class AStarPathfinder<N, E> extends AbstractHeuristicPathfinder<N, 
      *                      node and the destination.
      */
     public AStarPathfinder(@Nonnull final Network<N, E> graph, @Nonnull final ToDoubleFunction<E> edgeWeight,
-            @Nonnull final ToDoubleBiFunction<N, N> heuristicFunc) {
+            @Nonnull final HeuristicFunction<N> heuristicFunc) {
         super(graph, edgeWeight, heuristicFunc);
     }
 
